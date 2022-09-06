@@ -1,0 +1,1 @@
+- create .env if it doesnt exist
