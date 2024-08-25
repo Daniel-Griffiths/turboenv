@@ -1,9 +1,7 @@
+import { vol, fs } from "memfs";
 import { expect, it, vi, afterEach, describe, beforeEach } from "vitest";
 
-import mockFilesystem from "mock-fs";
-
 import { envToObject, objectToEnv } from "src/utils/env";
-import { ValidationType } from "src/enums/ValidationType";
 
 const ENV = `API_URL="http://localhost:3000"`;
 
@@ -29,14 +27,16 @@ vi.spyOn(process, "exit").mockImplementation((code): never => {
 });
 
 beforeEach(() => {
-  mockFilesystem({
+  vol.fromNestedJSON({
     ".env": ENV,
     "turboenv.json": CONFIG,
     ".env.example": ENV_EXAMPLE,
   });
 });
 
-afterEach(mockFilesystem.restore);
+afterEach(() => {
+  vol.reset();
+});
 
 describe("env", () => {
   it("can convert a env to a object", async () => {

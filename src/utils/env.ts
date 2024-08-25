@@ -1,4 +1,4 @@
-import inquirer from "inquirer";
+import { input } from "@inquirer/prompts";
 import { writeFileSync, readFileSync, existsSync } from "node:fs";
 
 import { logError } from "src/utils/log";
@@ -68,18 +68,14 @@ export async function validateEnvs(config: IConfig): Promise<void> {
       if (env[key]) continue;
       if (!config.schema[key]) throw new Error(`Unknown key: ${key}`);
 
-      const { answer } = await inquirer.prompt([
-        {
-          type: "input",
-          name: "answer",
-          default: value,
-          message: `"${key}" is missing from your "${envPath}" please a valid "${config.schema[key].type}":`,
-          validate: (answer) => {
-            const result = validateValue(config.schema[key], answer);
-            return !result.isValid ? result.error : true;
-          },
+      const answer = await input({
+        default: value,
+        message: `"${key}" is missing from your "${envPath}" please a valid "${config.schema[key].type}":`,
+        validate: (answer) => {
+          const result = validateValue(config.schema[key], answer);
+          return !result.isValid ? result.error : true;
         },
-      ]);
+      });
 
       writeFileSync(envPath, `\n${key}="${answer}"`, {
         flag: "a",
